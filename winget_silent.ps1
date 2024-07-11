@@ -9,11 +9,24 @@ if (Test-Path $logfile) {
     Remove-Item $logfile
 }
 
+# Function to check if the file is HTML
+function Test-HTMLFile {
+    param ([string]$path)
+    $content = Get-Content -Path $path -TotalCount 1
+    return $content -like "<!DOCTYPE html>*"
+}
+
 # Download the App Installer package
 try {
     Invoke-WebRequest -Uri $url -OutFile $output -ErrorAction Stop
 } catch {
     Add-Content $logfile "Failed to download Winget: $_"
+    exit 1
+}
+
+# Verify the downloaded file is not HTML
+if (Test-HTMLFile -path $output) {
+    Add-Content $logfile "Downloaded file is HTML, indicating an error or redirect."
     exit 1
 }
 
